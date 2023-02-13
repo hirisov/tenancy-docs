@@ -21,7 +21,7 @@ To make the `sanctum.csrf-cookie` route work in the tenant app, do the following
 
 ```php
 Route::group(['prefix' => config('sanctum.prefix', 'sanctum')], static function () {
-    Route::get('/csrf-cookie', [CsrfCookieController::class, 'show'])
+    Route::get('/csrf-cookie', [Laravel\Sanctum\Http\Controllers\CsrfCookieController::class, 'show'])
         ->middleware([
             'web',
             InitializeTenancyByDomain::class // Use tenancy initialization middleware of your choice
