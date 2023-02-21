@@ -37,3 +37,59 @@ Route::get('/foo', function () {
 And the route will work in both central and tenant applications. Should a tenant be found, tenancy will be initialized. Otherwise, the central context will be used.
 
 If you're using a different middleware, look at the `UniversalRoutes` feature source code and change the public static property accordingly.
+
+If in your application you need both tenant only, central and universal web and API routes you can manage it this way:
+
+* Place all the central only API routes in routes/api.php
+* Place all the central only web routes in routes/web.php
+* Use the routes/tenant.php to store all the tenant only and universal routes:
+
+```
+// TENANT WEB ROUTES
+Route::middleware([
+    'web',
+    InitializeTenancyByDomain::class,
+    PreventAccessFromCentralDomains::class,
+])->group(function () {
+  Route::get('foo-tenant', function () {
+    return 'bar-tenant';
+  });
+});
+
+// UNIVERSAL WEB ROUTES
+Route::middleware([
+    'web',
+    'universal',
+    InitializeTenancyByDomain::class,
+])->group(function () {
+  Route::get('foo-universal', function () {
+    return 'bar-universal';
+  });
+});
+
+// TENANT API ROUTES
+// eg.: GET /api/foo
+Route::middleware([
+    'api',
+    InitializeTenancyByDomain::class,
+    PreventAccessFromCentralDomains::class,
+])->prefix('api')->group(function () {
+  // api routes here
+  Route::get('foo', function () {
+    return 'bar-api';
+  });
+});
+
+// UNIVERSAL API ROUTES
+// eg.: GET /api/foo-universal
+Route::middleware([
+    'api',
+    'universal',
+    InitializeTenancyByDomain::class,
+])->prefix('api')->group(function () {
+  // api routes here
+  Route::get('foo-universal', function () {
+    return 'bar-uniiversal';
+  });
+});
+```
